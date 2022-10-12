@@ -1,13 +1,16 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:serener/views/homePage.dart';
 import 'package:serener/widgets/myButton.dart';
 import 'package:serener/widgets/myColor.dart';
 import 'package:serener/widgets/myText.dart';
 import 'package:serener/widgets/myTextFormField.dart';
 import 'package:serener/widgets/size_config.dart';
+import 'package:serener/widgets/user_login.dart';
 import 'package:serener/widgets/validator.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -21,22 +24,35 @@ class _LoginState extends State<Login> {
   TextEditingController passwordController = TextEditingController();
   bool toggle = true;
 
-  void login(String email, password) async {
+  Future<http.Response?> login(UserLogin data) async {
+    http.Response? loginResponse;
+    var url = Uri.parse("https://serener-app.herokuapp.com/api/login");
+    Map<String, String> requestHeaders = {
+      "Content-type": "application/json",
+      "Accept": "/",
+    };
+
     try {
-      Response response = await post(
-          Uri.parse('https://serener-app.herokuapp.com/api/login'),
-          body: {'email': email, 'password': password});
-      if (response.statusCode == 200) {
-        var loginData = jsonDecode(response.body.toString());
-        print(loginData['token']);
-        print('Login successfully');
-      } else {
-        print('Login failed');
+      loginResponse = await http.post(url,
+          headers: requestHeaders, body: jsonEncode(data.toJson()));
+      if (loginResponse.statusCode == 202) {
+        // ignore: use_build_context_synchronously
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => const Homepage()));
+        if (kDebugMode) {
+          print("Response status: ${loginResponse.statusCode}");
+          print("Response body: ${loginResponse.body}");
+          var responseData = jsonDecode(loginResponse.body);
+          print(responseData);
+        }
       }
     } catch (e, s) {
-      print(e.toString());
-      print(s.toString());
+      if (kDebugMode) {
+        print(e);
+        print(s);
+      }
     }
+    return loginResponse;
   }
 
   @override
@@ -156,9 +172,9 @@ class _LoginState extends State<Login> {
                 ),
                 myButton(
                     onTap: () {
-                      login(emailController.text.toString(),
-                          passwordController.text.toString());
-                      Navigator.pushNamed(context, 'Homepage');
+                      login(UserLogin(
+                          email: emailController.text.trim(),
+                          password: passwordController.text.trim()));
                     },
                     height: 54,
                     width: double.infinity,

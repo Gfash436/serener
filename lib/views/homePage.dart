@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import 'package:serener/models/itemInfo.dart';
 import 'package:serener/widgets/myColor.dart';
 import 'package:serener/widgets/myImage.dart';
 
@@ -11,8 +12,16 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  // final user = FirebaseAuth.instance.currentUser;
-  // final CollectionReference _reference =  FirebaseFirestore.instance.collection('users-data');
+  final item = [
+    ItemInfo(
+        itemImage: Image.asset('assets/images/hennessy.png'),
+        itemName: 'Hennessy',
+        itemPrice: '4000'),
+    ItemInfo(
+        itemImage: Image.asset('assets/images/eur.png'),
+        itemName: 'Brandy',
+        itemPrice: '5000')
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +60,7 @@ class _HomepageState extends State<Homepage> {
         ),
       ),
       body: ListView.builder(
-          itemCount: 8,
+          itemCount: item.length,
           itemBuilder: (context, index) {
             return Padding(
               padding: const EdgeInsets.all(10),
@@ -82,7 +91,7 @@ class _HomepageState extends State<Homepage> {
                       SizedBox(
                           width: 150,
                           height: 150,
-                          child: myImage('assets/images/eur.png')),
+                          child: myImage('assets/images/hennessy.png')),
                       Padding(
                         padding: const EdgeInsets.all(10),
                         child: Column(
@@ -92,53 +101,30 @@ class _HomepageState extends State<Homepage> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text(
-                                  'name',
-                                  style: TextStyle(
+                                Text(
+                                  item[index].itemName,
+                                  style: const TextStyle(
                                     color: Color(0xff000000),
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                // PopupMenuButton(
-                                //   itemBuilder: (BuildContext context) =>
-                                //   <PopupMenuEntry>[
-                                //     const PopupMenuItem(
-                                //       child: Text('Edit'),
-                                //     ),
-                                //     const PopupMenuItem(
-                                //       child: Text('Delete'),
-                                //     ),
-                                //   ],
-                                // )
                               ],
                             ),
-                            const Text(
-                              'description',
+                            // const Text(
+                            //   'description',
+                            //   style: TextStyle(
+                            //     color: Color(0xff000000),
+                            //     fontSize: 16,
+                            //   ),
+                            // ),
+                            Text(
+                              '₦ ${item[index].itemPrice}',
                               style: TextStyle(
-                                color: Color(0xff000000),
+                                color: Palette.kBackgroundColor,
                                 fontSize: 16,
+                                fontWeight: FontWeight.bold,
                               ),
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  '₦ ',
-                                  style: TextStyle(
-                                    color: Palette.kBackgroundColor,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  'price',
-                                  style: TextStyle(
-                                    color: Palette.kBackgroundColor,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
                             ),
                           ],
                         ),

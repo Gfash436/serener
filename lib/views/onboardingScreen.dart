@@ -44,8 +44,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                     child: const Text(
                       'SKIP',
                       style: TextStyle(
-                        color: Colors.black,
-                      ),
+                          color: Colors.black, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -87,8 +86,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                 Padding(
                   padding: const EdgeInsets.only(right: 34.0, bottom: 40),
                   child: SizedBox(
-                    height: 94,
-                    width: 94,
+                    height: 70,
+                    width: 70,
                     child: ElevatedButton(
                       onPressed: () {
                         _pageController.nextPage(
@@ -133,19 +132,20 @@ class OnBoard {
 
 final List<OnBoard> demo_data = [
   OnBoard(
-      image: "assets/images/eur.png",
-      title: "Take hold of \n your finances",
-      description: "Running your finances is easier with xyz"),
-  OnBoard(
-      image: "assets/images/eur.png",
-      title: "See where your  \n money is going",
+      image: "assets/images/newBeer.png",
+      title: "Special drinks",
       description:
-          "Stay on top by efforteasily tracking your\n your subscription & bills"),
+          "We offer the best choice of drinks for\n you and your family."),
   OnBoard(
-      image: "assets/images/eur.png",
-      title: "Reach your \n goals with ease",
+      image: "assets/images/newcup.png",
+      title: "Pour and enjoy",
       description:
-          "Use the smart saving features to\nmanage your future goals and needs"),
+          "Taking good drink is the best for your\n health, taste and enjoy."),
+  OnBoard(
+      image: "assets/images/confectionery.png",
+      title: "Confectioneries",
+      description:
+          "Have a taste of confectioneries rich\n in sugar and carbohydrate."),
 ];
 
 class OnBoardingContent extends StatelessWidget {
@@ -158,32 +158,35 @@ class OnBoardingContent extends StatelessWidget {
   final String image, title, description;
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(
-          height: 10,
-        ),
-        Image.asset(
-          image,
-          // height:279,
-        ),
-        const SizedBox(
-          height: 25,
-        ),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 44, color: Color(0xff151940)),
-        ),
-        const SizedBox(
-          height: 25,
-        ),
-        Text(
-          description,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: Column(
+        children: [
+          const SizedBox(
+            height: 30,
+          ),
+          Image.asset(
+            image,
+            // height:279,
+          ),
+          const SizedBox(
+            height: 50,
+          ),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 44, color: Color(0xff151940)),
+          ),
+          const SizedBox(
+            height: 25,
+          ),
+          Text(
+            description,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+          ),
+        ],
+      ),
     );
   }
 }

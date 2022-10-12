@@ -1,13 +1,16 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:serener/views/login.dart';
+import 'package:serener/widgets/create_user.dart';
 import 'package:serener/widgets/myButton.dart';
 import 'package:serener/widgets/myColor.dart';
 import 'package:serener/widgets/myText.dart';
 import 'package:serener/widgets/myTextFormField.dart';
 import 'package:serener/widgets/size_config.dart';
 import 'package:serener/widgets/validator.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 
 class SignUp extends StatefulWidget {
   @override
@@ -25,30 +28,36 @@ class _SignUpState extends State<SignUp> with SingleTickerProviderStateMixin {
   late TabController tabController;
   bool toggle = true;
 
-  void signUp(
-      String firstName, lastName, age, email, phoneNumber, password) async {
+  Future<http.Response?> signUp(UserSignUp data) async {
+    http.Response? signUpResponse;
+    var url = Uri.parse("https://serener-app.herokuapp.com/api/signup");
+    Map<String, String> requestHeaders = {
+      "Content-type": "application/json",
+      "Accept": "/",
+    };
+
     try {
-      Response response = await post(
-          Uri.parse('https://serener-app.herokuapp.com/api/signup'),
-          body: {
-            'firstName': firstName,
-            'lastName': lastName,
-            'age': age,
-            'email': email,
-            'phoneNumber': phoneNumber,
-            'password': password
-          });
-      if (response.statusCode == 200) {
-        var userData = jsonDecode(response.body.toString());
-        print(userData['token']);
-        print('Account created successfully');
-      } else {
-        print('Account creation failed');
+      signUpResponse = await http.post(url,
+          headers: requestHeaders, body: jsonEncode(data.toJson()));
+      if (signUpResponse.statusCode == 201 ||
+          signUpResponse.statusCode == 202) {
+        // ignore: use_build_context_synchronously
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => const Login()));
+        if (kDebugMode) {
+          print("Response status: ${signUpResponse.statusCode}");
+          print("Response body: ${signUpResponse.body}");
+          var responseData = jsonDecode(signUpResponse.body);
+          print(responseData);
+        }
       }
     } catch (e, s) {
-      print(e.toString());
-      print(s.toString());
+      if (kDebugMode) {
+        print(e);
+        print(s);
+      }
     }
+    return signUpResponse;
   }
 
   @override
@@ -272,14 +281,13 @@ class _SignUpState extends State<SignUp> with SingleTickerProviderStateMixin {
                 ),
                 myButton(
                     onTap: () {
-                      signUp(
-                          firstNameController.text.toString(),
-                          lastNameController.text.toString(),
-                          ageController.text.toString(),
-                          emailController.text.toString(),
-                          phoneController.text.toString(),
-                          passwordController.text.toString());
-                      Navigator.pushNamed(context, 'Login');
+                      signUp(UserSignUp(
+                          password: passwordController.text.trim(),
+                          email: emailController.text.trim(),
+                          age: ageController.text.trim(),
+                          firstname: firstNameController.text.trim(),
+                          lastname: lastNameController.text.trim(),
+                          phonenumber: phoneController.text.trim()));
                     },
                     height: 54,
                     width: double.infinity,
