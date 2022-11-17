@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:serener/post/dbProvider.dart';
 import 'package:serener/widgets/myColor.dart';
 import 'package:serener/widgets/myText.dart';
 import 'package:serener/widgets/size_config.dart';
@@ -18,7 +19,13 @@ class _SplashScreenState extends State<SplashScreen> {
     // TODO: implement initState
     super.initState();
     Future.delayed(const Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, 'OnBoardingScreen');
+      DatabaseProvider().getToken().then((value) {
+        if (value == '') {
+          Navigator.pushReplacementNamed(context, 'OnBoardingScreen');
+        } else {
+          Navigator.pushReplacementNamed(context, 'Homepage');
+        }
+      });
     });
   }
 

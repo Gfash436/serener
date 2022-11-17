@@ -1,16 +1,23 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:serener/views/homePage.dart';
+import 'package:serener/widgets/controllers.dart';
 import 'package:serener/widgets/myButton.dart';
 import 'package:serener/widgets/myColor.dart';
 import 'package:serener/widgets/myText.dart';
 import 'package:serener/widgets/myTextFormField.dart';
+import 'package:serener/widgets/routers.dart';
 import 'package:serener/widgets/size_config.dart';
 import 'package:serener/widgets/user_login.dart';
 import 'package:serener/widgets/validator.dart';
 import 'package:http/http.dart' as http;
+
+import '../post/authprovider.dart';
+import '../widgets/snack_messages.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -20,40 +27,40 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  bool toggle = true;
+  final TextEditingController _loginEmailController = TextEditingController();
+  final TextEditingController _loginPasswordController =
+      TextEditingController();
+  // Future<http.Response?> login(UserLogin data) async {
+  //   http.Response? loginResponse;
+  //   var url = Uri.parse("https://serener-app.herokuapp.com/api/login");
+  //   Map<String, String> requestHeaders = {
+  //     "Content-type": "application/json",
+  //     "Accept": "/",
+  //   };
 
-  Future<http.Response?> login(UserLogin data) async {
-    http.Response? loginResponse;
-    var url = Uri.parse("https://serener-app.herokuapp.com/api/login");
-    Map<String, String> requestHeaders = {
-      "Content-type": "application/json",
-      "Accept": "/",
-    };
+  //   try {
+  //     loginResponse = await http.post(url,
+  //         headers: requestHeaders, body: jsonEncode(data.toJson()));
+  //     if (loginResponse.statusCode == 202) {
+  //       setState(() {
+  //         loginIsLoading = true;
+  //       });
 
-    try {
-      loginResponse = await http.post(url,
-          headers: requestHeaders, body: jsonEncode(data.toJson()));
-      if (loginResponse.statusCode == 202) {
-        // ignore: use_build_context_synchronously
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => const Homepage()));
-        if (kDebugMode) {
-          print("Response status: ${loginResponse.statusCode}");
-          print("Response body: ${loginResponse.body}");
-          var responseData = jsonDecode(loginResponse.body);
-          print(responseData);
-        }
-      }
-    } catch (e, s) {
-      if (kDebugMode) {
-        print(e);
-        print(s);
-      }
-    }
-    return loginResponse;
-  }
+  //       print('Login successfully');
+  //       Navigator.pushNamed(context, 'Homepage');
+  //     } else {
+  //       print('Login failed');
+  //     }
+  //   } catch (e, s) {
+  //     print(e);
+  //     print(s);
+  //   }
+  //   Future.delayed(const Duration(seconds: 3)).then((value) {
+  //     loginIsLoading = false;
+  //     setState(() {});
+  //   });
+  //   return loginResponse;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +109,7 @@ class _LoginState extends State<Login> {
                 ),
                 KTextFormField(
                     hint: "Email Address",
-                    textEditingController: emailController,
+                    textEditingController: _loginEmailController,
                     keyboardType: TextInputType.emailAddress,
                     obscureText: false,
                     validator: Validator().validateEmail,
@@ -123,7 +130,7 @@ class _LoginState extends State<Login> {
                 ),
                 KTextFormField(
                   hint: "password",
-                  textEditingController: passwordController,
+                  textEditingController: _loginPasswordController,
                   keyboardType: TextInputType.visiblePassword,
                   obscureText: toggle,
                   passwordIcon: GestureDetector(
@@ -158,7 +165,7 @@ class _LoginState extends State<Login> {
                     GestureDetector(
                       onTap: () {},
                       child: myText(
-                        data: 'forgot password?',
+                        data: 'Forgot password?',
                         textAlign: TextAlign.center,
                         color: Palette.kTextColor,
                         fontSize: 14,
@@ -170,17 +177,48 @@ class _LoginState extends State<Login> {
                 SizedBox(
                   height: getProportionateScreenHeight(100),
                 ),
-                myButton(
-                    onTap: () {
-                      login(UserLogin(
-                          email: emailController.text.trim(),
-                          password: passwordController.text.trim()));
-                    },
-                    height: 54,
-                    width: double.infinity,
-                    borderRadius: 8,
-                    color: Palette.kBackgroundColor,
-                    child: myText(data: 'Login', color: Palette.kColorWhite)),
+                Consumer<AuthenticationProvider>(
+                    builder: (context, auth, snapshot) {
+                  WidgetsBinding.instance!.addPostFrameCallback((_) {
+                    if (auth.resMessage != "") {
+                      showMessage(message: auth.resMessage, context: context);
+
+                      //clear the response message to avoide duplicate
+                      auth.clear();
+                    }
+                  });
+                  return myButton(
+                      onTap: () {
+                        if (_loginEmailController.text.isEmpty ||
+                            _loginPasswordController.text.isEmpty) {
+                          showMessage(
+                              message: 'Enter correct information',
+                              context: context);
+                        } else {
+                          auth.LoginUser(
+                              email: _loginEmailController.text.trim(),
+                              password: _loginPasswordController.text,
+                              context: context);
+                        }
+                        Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                                builder: (context) => const Homepage()));
+                        // login(UserLogin(
+                        //     email: loginEmailController.text.trim(),
+                        //     password: loginPasswordController.text.trim()));
+                      },
+                      status: auth.isLoading,
+                      height: 54,
+                      width: double.infinity,
+                      borderRadius: 8,
+                      color: Palette.kBackgroundColor,
+                      child: loginIsLoading == false
+                          ? myText(data: 'Login', color: Palette.kColorWhite)
+                          : Center(
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 5, color: Palette.kColorGold)));
+                }),
               ],
             ),
           ),

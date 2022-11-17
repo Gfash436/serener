@@ -2,15 +2,20 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:serener/views/login.dart';
+import 'package:serener/widgets/controllers.dart';
 import 'package:serener/widgets/create_user.dart';
 import 'package:serener/widgets/myButton.dart';
 import 'package:serener/widgets/myColor.dart';
 import 'package:serener/widgets/myText.dart';
 import 'package:serener/widgets/myTextFormField.dart';
 import 'package:serener/widgets/size_config.dart';
+import 'package:serener/widgets/snack_messages.dart';
 import 'package:serener/widgets/validator.dart';
 import 'package:http/http.dart' as http;
+
+import '../post/authprovider.dart';
 
 class SignUp extends StatefulWidget {
   @override
@@ -18,47 +23,37 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> with SingleTickerProviderStateMixin {
-  TextEditingController phoneController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController firstNameController = TextEditingController();
-  TextEditingController lastNameController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController ageController = TextEditingController();
+  // Future<http.Response?> signUp(UserSignUp data) async {
+  //   http.Response? signUpResponse;
+  //   var url = Uri.parse("https://serener-app.herokuapp.com/api/signup");
+  //   Map<String, String> requestHeaders = {
+  //     "Content-type": "application/json",
+  //     "Accept": "/",
+  //   };
 
-  late TabController tabController;
-  bool toggle = true;
-
-  Future<http.Response?> signUp(UserSignUp data) async {
-    http.Response? signUpResponse;
-    var url = Uri.parse("https://serener-app.herokuapp.com/api/signup");
-    Map<String, String> requestHeaders = {
-      "Content-type": "application/json",
-      "Accept": "/",
-    };
-
-    try {
-      signUpResponse = await http.post(url,
-          headers: requestHeaders, body: jsonEncode(data.toJson()));
-      if (signUpResponse.statusCode == 201 ||
-          signUpResponse.statusCode == 202) {
-        // ignore: use_build_context_synchronously
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => const Login()));
-        if (kDebugMode) {
-          print("Response status: ${signUpResponse.statusCode}");
-          print("Response body: ${signUpResponse.body}");
-          var responseData = jsonDecode(signUpResponse.body);
-          print(responseData);
-        }
-      }
-    } catch (e, s) {
-      if (kDebugMode) {
-        print(e);
-        print(s);
-      }
-    }
-    return signUpResponse;
-  }
+  //   try {
+  //     signUpResponse = await http.post(url,
+  //         headers: requestHeaders, body: jsonEncode(data.toJson()));
+  //     if (signUpResponse.statusCode == 201) {
+  //       setState(() {
+  //         signUpIsLoading = true;
+  //       });
+  //       print('Account created successfully');
+  //       // ignore: use_build_context_synchronously
+  //       Navigator.pushNamed(context, 'Login');
+  //     } else {
+  //       print('Failed');
+  //     }
+  //   } catch (e, s) {
+  //     print(e);
+  //     print(s);
+  //   }
+  //   Future.delayed(const Duration(seconds: 3)).then((value) {
+  //     signUpIsLoading = false;
+  //     setState(() {});
+  //   });
+  //   return signUpResponse;
+  // }
 
   @override
   void initState() {
@@ -87,9 +82,7 @@ class _SignUpState extends State<SignUp> with SingleTickerProviderStateMixin {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  height: getProportionateScreenHeight(20),
-                ),
+                SizedBox(height: getProportionateScreenHeight(20)),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -102,9 +95,7 @@ class _SignUpState extends State<SignUp> with SingleTickerProviderStateMixin {
                     ),
                   ],
                 ),
-                SizedBox(
-                  height: getProportionateScreenHeight(31),
-                ),
+                SizedBox(height: getProportionateScreenHeight(31)),
                 myText(
                   data: 'First Name',
                   textAlign: TextAlign.center,
@@ -112,9 +103,7 @@ class _SignUpState extends State<SignUp> with SingleTickerProviderStateMixin {
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
-                SizedBox(
-                  height: getProportionateScreenHeight(8),
-                ),
+                SizedBox(height: getProportionateScreenHeight(8)),
                 KTextFormField(
                     hint: "First Name",
                     textEditingController: firstNameController,
@@ -127,7 +116,6 @@ class _SignUpState extends State<SignUp> with SingleTickerProviderStateMixin {
                   height: getProportionateScreenHeight(16),
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,11 +127,9 @@ class _SignUpState extends State<SignUp> with SingleTickerProviderStateMixin {
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
+                        SizedBox(height: getProportionateScreenHeight(8)),
                         SizedBox(
-                          height: getProportionateScreenHeight(8),
-                        ),
-                        SizedBox(
-                          width: getProportionateScreenWidth(200),
+                          width: 200,
                           child: KTextFormField(
                               hint: "Last Name",
                               textEditingController: lastNameController,
@@ -155,38 +141,34 @@ class _SignUpState extends State<SignUp> with SingleTickerProviderStateMixin {
                         ),
                       ],
                     ),
-                    SizedBox(
-                      width: getProportionateScreenHeight(10),
-                    ),
-                    SizedBox(
-                      width: getProportionateScreenWidth(120),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          myText(
-                            data: 'Age',
-                            textAlign: TextAlign.center,
-                            color: Palette.kTextColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          SizedBox(height: getProportionateScreenHeight(8)),
-                          KTextFormField(
+                    SizedBox(width: getProportionateScreenWidth(10)),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        myText(
+                          data: 'Age',
+                          textAlign: TextAlign.center,
+                          color: Palette.kTextColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        SizedBox(height: getProportionateScreenHeight(8)),
+                        SizedBox(
+                          width: 110,
+                          child: KTextFormField(
                               hint: "Age",
                               textEditingController: ageController,
                               keyboardType: TextInputType.phone,
                               obscureText: false,
                               validator: Validator().validatePhoneNumber,
-                              width: double.infinity,
+                              width: getProportionateScreenWidth(110),
                               isPasswordType: false),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                SizedBox(
-                  height: getProportionateScreenHeight(16),
-                ),
+                SizedBox(height: getProportionateScreenHeight(16)),
                 myText(
                   data: 'Email Address',
                   textAlign: TextAlign.center,
@@ -194,23 +176,17 @@ class _SignUpState extends State<SignUp> with SingleTickerProviderStateMixin {
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
-                SizedBox(
-                  height: getProportionateScreenHeight(8),
-                ),
+                SizedBox(height: getProportionateScreenHeight(8)),
                 KTextFormField(
                     hint: "Email Address",
-                    textEditingController: emailController,
+                    textEditingController: signUpEmailController,
                     keyboardType: TextInputType.emailAddress,
                     obscureText: false,
                     validator: Validator().validateEmail,
                     width: double.infinity,
                     isPasswordType: false),
-                SizedBox(
-                  height: getProportionateScreenHeight(8),
-                ),
-                SizedBox(
-                  height: getProportionateScreenHeight(16),
-                ),
+                SizedBox(height: getProportionateScreenHeight(8)),
+                SizedBox(height: getProportionateScreenHeight(16)),
                 myText(
                   data: 'Phone Number',
                   textAlign: TextAlign.center,
@@ -218,9 +194,7 @@ class _SignUpState extends State<SignUp> with SingleTickerProviderStateMixin {
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
-                SizedBox(
-                  height: getProportionateScreenHeight(8),
-                ),
+                SizedBox(height: getProportionateScreenHeight(8)),
                 KTextFormField(
                     hint: "PhoneNumber",
                     textEditingController: phoneController,
@@ -229,9 +203,7 @@ class _SignUpState extends State<SignUp> with SingleTickerProviderStateMixin {
                     validator: Validator().validatePhoneNumber,
                     width: double.infinity,
                     isPasswordType: false),
-                SizedBox(
-                  height: getProportionateScreenHeight(16),
-                ),
+                SizedBox(height: getProportionateScreenHeight(16)),
                 myText(
                   data: 'Password',
                   textAlign: TextAlign.center,
@@ -239,12 +211,10 @@ class _SignUpState extends State<SignUp> with SingleTickerProviderStateMixin {
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
-                SizedBox(
-                  height: getProportionateScreenHeight(8),
-                ),
+                SizedBox(height: getProportionateScreenHeight(8)),
                 KTextFormField(
                   hint: "password",
-                  textEditingController: passwordController,
+                  textEditingController: signUpPasswordController,
                   keyboardType: TextInputType.visiblePassword,
                   obscureText: toggle,
                   passwordIcon: GestureDetector(
@@ -276,24 +246,71 @@ class _SignUpState extends State<SignUp> with SingleTickerProviderStateMixin {
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
                 ),
-                SizedBox(
-                  height: getProportionateScreenHeight(30),
-                ),
-                myButton(
-                    onTap: () {
-                      signUp(UserSignUp(
-                          password: passwordController.text.trim(),
-                          email: emailController.text.trim(),
-                          age: ageController.text.trim(),
-                          firstname: firstNameController.text.trim(),
-                          lastname: lastNameController.text.trim(),
-                          phonenumber: phoneController.text.trim()));
-                    },
-                    height: 54,
-                    width: double.infinity,
-                    borderRadius: 8,
-                    color: Palette.kBackgroundColor,
-                    child: myText(data: 'SignUp', color: Palette.kColorWhite)),
+                SizedBox(height: getProportionateScreenHeight(30)),
+                Consumer<AuthenticationProvider>(
+                    builder: (context, auth, snapshot) {
+                  WidgetsBinding.instance!.addPostFrameCallback((_) {
+                    if (auth.resMessage != "") {
+                      showMessage(message: auth.resMessage, context: context);
+
+                      //clear the response message to avoide duplicate
+                      auth.clear();
+                    }
+                  });
+                  return myButton(
+                      onTap: () {
+                        if (firstNameController.text.isEmpty ||
+                            lastNameController.text.isEmpty ||
+                            ageController.text.isEmpty ||
+                            phoneController.text.isEmpty ||
+                            signUpEmailController.text.isEmpty ||
+                            signUpPasswordController.text.isEmpty) {
+                          showMessage(
+                              message: 'All fields are required.',
+                              context: context);
+                        } else {
+                          auth.SignupUser(
+                              firstName: firstNameController.text.trim(),
+                              lastName: lastNameController.text.trim(),
+                              age: ageController.text.trim(),
+                              phoneNumber: phoneController.text.trim(),
+                              email: signUpEmailController.text.trim(),
+                              password: signUpPasswordController.text,
+                              context: context);
+                        }
+                      },
+                      status: auth.isLoading,
+                      height: 54,
+                      width: double.infinity,
+                      borderRadius: 8,
+                      color: Palette.kBackgroundColor,
+                      child: loginIsLoading == false
+                          ? myText(data: 'Sign Up', color: Palette.kColorWhite)
+                          : Center(
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 5, color: Palette.kColorGold)));
+                }),
+
+                // myButton(
+
+                //     onTap: () {
+                //       signUp(UserSignUp(
+                //           password: signUpPasswordController.text.trim(),
+                //           email: signUpEmailController.text.trim(),
+                //           age: ageController.text.trim(),
+                //           firstname: firstNameController.text.trim(),
+                //           lastname: lastNameController.text.trim(),
+                //           phonenumber: phoneController.text.trim()));
+                //     },
+                //     height: 54,
+                //     width: double.infinity,
+                //     borderRadius: 8,
+                //     color: Palette.kBackgroundColor,
+                //     child: signUpIsLoading == false
+                //         ? myText(data: 'SignUp', color: Palette.kColorWhite)
+                //         : Center(
+                //             child: CircularProgressIndicator(
+                //                 strokeWidth: 5, color: Palette.kColorGold))),
               ],
             ),
           ),

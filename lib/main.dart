@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:serener/post/authprovider.dart';
 import 'package:serener/views/SplashScreen.dart';
 import 'package:serener/views/homePage.dart';
 import 'package:serener/views/login.dart';
@@ -15,20 +17,25 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthenticationProvider())
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        initialRoute: "/",
+        routes: {
+          "/": (context) => const SplashScreen(),
+          'LoginSignup': (context) => const LoginSignup(),
+          'OnBoardingScreen': (context) => OnBoardingScreen(),
+          'Login': (context) => const Login(),
+          'Homepage': (context) => const Homepage(),
+        },
       ),
-      initialRoute: "/",
-      routes: {
-        "/": (context) => const SplashScreen(),
-        'LoginSignup': (context) => LoginSignup(),
-        'OnBoardingScreen': (context) => OnBoardingScreen(),
-        'Login': (context) => const Login(),
-        'Homepage': (context) => const Homepage(),
-      },
     );
   }
 }

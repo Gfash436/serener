@@ -11,9 +11,11 @@ class myButton extends StatelessWidget {
   final double? borderRadius;
   final BoxShape? boxShape;
   final List<BoxShadow>? boxshadow;
+  final bool? status;
 
   const myButton(
       {super.key,
+      this.status,
       this.onTap,
       this.color,
       this.alignment,
